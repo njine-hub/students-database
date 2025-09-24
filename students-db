@@ -1,1 +1,118 @@
+-- Create Database
+CREATE DATABASE StudentRecordsDB;
+USE StudentRecordsDB;
 
+-- Table: Departments
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY AUTO_INCREMENT,
+    dept_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Table: Students
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    dob DATE NOT NULL,
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);
+
+-- Table: Instructors
+CREATE TABLE Instructors (
+    instructor_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);
+
+-- Table: Courses
+CREATE TABLE Courses (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100) NOT NULL,
+    course_code VARCHAR(20) NOT NULL UNIQUE,
+    dept_id INT NOT NULL,
+    instructor_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (instructor_id) REFERENCES Instructors(instructor_id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);
+
+-- Table: Enrollments (Many-to-Many between Students & Courses)
+CREATE TABLE Enrollments (
+    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enrollment_date DATE NOT NULL,
+    grade CHAR(2),
+    FOREIGN KEY (student_id) REFERENCES Students(student_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    UNIQUE(student_id, course_id)
+);
+
+-- Table: StudentProfiles (One-to-One with Students)
+CREATE TABLE StudentProfiles (
+    profile_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT UNIQUE NOT NULL,
+    address VARCHAR(255),
+    phone VARCHAR(20),
+    FOREIGN KEY (student_id) REFERENCES Students(student_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+
+-- Departments
+INSERT INTO Departments (dept_name) VALUES
+('Computer Science'),
+('Mathematics'),
+('Business Administration');
+
+-- Students
+INSERT INTO Students (first_name, last_name, email, dob, dept_id) VALUES
+('Ethan', 'Mwangi', 'ethan.mwangi@university.edu', '2002-05-12', 1),
+('Sophia', 'Kariuki', 'sophia.kariuki@university.edu', '2001-11-23', 2),
+('Liam', 'Ochieng', 'liam.ochieng@university.edu', '2003-02-18', 1),
+('Ava', 'Mutiso', 'ava.mutiso@university.edu', '2000-08-30', 3);
+
+-- Student Profiles
+INSERT INTO StudentProfiles (student_id, address, phone) VALUES
+(1, '45 Riverside Drive, Nairobi', '0712-345-678'),
+(2, '12 Kenyatta Avenue, Nakuru', '0722-111-222'),
+(3, '89 Moi Road, Kisumu', '0733-444-555'),
+(4, '7 Mombasa Road, Mombasa', '0744-666-777');
+
+-- Instructors
+INSERT INTO Instructors (first_name, last_name, email, dept_id) VALUES
+('Dr. Grace', 'Kamau', 'grace.kamau@university.edu', 1),
+('Prof. Daniel', 'Otieno', 'daniel.otieno@university.edu', 2),
+('Dr. Mary', 'Wanjiru', 'mary.wanjiru@university.edu', 3);
+
+-- Courses
+INSERT INTO Courses (course_name, course_code, dept_id, instructor_id) VALUES
+('Database Systems', 'CS101', 1, 1),
+('Algorithms and Data Structures', 'CS102', 1, 1),
+('Linear Algebra II', 'MATH201', 2, 2),
+('Principles of Marketing', 'BUS301', 3, 3);
+
+-- Enrollments
+INSERT INTO Enrollments (student_id, course_id, enrollment_date, grade) VALUES
+(1, 1, '2025-01-15', 'A'),
+(1, 2, '2025-01-15', 'B'),
+(2, 3, '2025-01-16', 'B+'),
+(3, 1, '2025-01-16', 'A-'),
+(4, 4, '2025-01-17', 'B');
